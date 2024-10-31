@@ -1,7 +1,10 @@
 import tkinter as tk
 import customtkinter as ctk
 from customtkinter import *
+from time import strftime
 from tkinter import ttk
+from tkinter import messagebox
+from datetime import datetime
 from modelo.pacienteDao import Persona, guardarDatoPaciente, listarCondicion, listar, editarDatoPaciente, eliminarPaciente
 
 class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
@@ -10,11 +13,20 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
         self.root = root
         self.pack()
         self.camposPacientes()
-        self.habilitar()
+        self.lblReloj = ctk.CTkLabel(self, font=('Arial', 15, 'bold'), text_color='white')
+        self.lblReloj.grid(row=0, column=7, padx=10, pady=10,columnspan=7)
+        self.lblFecha = ctk.CTkLabel(self, font=('Arial', 15, 'bold'), text_color='white')
+        self.lblFecha.grid(row=0, column=6, padx=10, pady=5,columnspan=6)
         self.deshabilitar()
         self.tablaPaciente()
+        self.reloj()        
 
-        font_style = ("Helvetica", 12)
+    def reloj(self):
+        tiempo = strftime('%I:%M:%S %p')  # Formato de 12 horas
+        fecha = datetime.now().strftime('%d de %B del %Y')  # Formato deseado
+        self.lblReloj.configure(text=tiempo)
+        self.lblFecha.configure(text=fecha)
+        self.lblReloj.after(1000, self.reloj) 
 
     def camposPacientes(self):
         # Labels for each field
@@ -123,20 +135,20 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
         #ENTRYS BUSCADOR
         self.svBuscarDni = ctk.StringVar()
         self.entryBuscarDni = ctk.CTkEntry(self, textvariable=self.svBuscarDni)
-        self.entryBuscarDni.configure(width=250, font=('ARIAL',15, 'bold'), text_color='white')
-        self.entryBuscarDni.grid(column=4, row=0, padx=10, pady=5)
+        self.entryBuscarDni.configure(width=200, font=('ARIAL',15, 'bold'), text_color='white')
+        self.entryBuscarDni.grid(column=4, row=0, padx=10, pady=5, columnspan=3)
 
         self.svBuscarApellido = ctk.StringVar()
         self.entryBuscarApellido = ctk.CTkEntry(self, textvariable=self.svBuscarApellido)
-        self.entryBuscarApellido.configure(width=250, font=('ARIAL',15, 'bold'), text_color='white')
-        self.entryBuscarApellido.grid(column=4, row=1, padx=10, pady=5)
+        self.entryBuscarApellido.configure(width=200, font=('ARIAL',15, 'bold'), text_color='white')
+        self.entryBuscarApellido.grid(column=4, row=1, padx=10, pady=5, columnspan=3)
 
         #BUTTON BUSCADOR
-        self.btnBuscarCondicion = ctk.CTkButton(self, text='Buscar', command = self.buscarCondicion)
+        self.btnBuscarCondicion = ctk.CTkButton(self, text='BUSCAR', command = self.buscarCondicion)
         self.btnBuscarCondicion.configure(font=('ARIAL',16,'bold'),fg_color="#800080", text_color='white')
         self.btnBuscarCondicion.grid(column=4,row=2, padx=10, pady=5, columnspan=1)
 
-        self.btnLimpiarBuscador = ctk.CTkButton(self, text='Limpiar', command = self.limpiarBuscador)
+        self.btnLimpiarBuscador = ctk.CTkButton(self, text='LIMPIAR', command = self.limpiarBuscador)
         self.btnLimpiarBuscador.configure(font=('ARIAL',16,'bold'),fg_color="#800080", text_color='white')
         self.btnLimpiarBuscador.grid(column=4,row=3, padx=10, pady=5, columnspan=1)
 
@@ -175,21 +187,6 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
         else:
             self.tablaPaciente()
 
-    def guardarPaciente(self):
-        persona = Persona(
-            self.svNombre.get(), self.svApellidos.get(), self.svDNI.get(),
-            self.svEdad.get(), self.svPeso.get(), self.svTalla.get(), self.svPeso.get(),
-            self.svTelefono.get(), self.svAntecedentes.get()
-        )
-
-        if self.idPersona == None:
-            guardarDatoPaciente(persona)
-        else:
-            editarDatoPaciente(persona, self.idPersona)
-
-        
-        self.deshabilitar()
-        self.tablaPaciente()
 
     def habilitar(self):
         self.svNombre.set('')
@@ -259,7 +256,7 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
         self.tabla.heading('#0', text='ID', anchor=W)
         self.tabla.heading('#1', text='Nombre', anchor=W)
         self.tabla.heading('#2', text='Apellidos', anchor=W)
-        self.tabla.heading('#3', text='Dni', anchor=W)
+        self.tabla.heading('#3', text='DNI', anchor=W)
         self.tabla.heading('#4', text='Edad', anchor=W)
         self.tabla.heading('#5', text='Peso', anchor=W)
         self.tabla.heading('#6', text='Talla', anchor=W)
@@ -286,11 +283,11 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
 
     # Configuración de botones
         button_color = "#800080"  # Color púrpura
-        self.btnEditarPaciente = ctk.CTkButton(self, text="EDITAR", fg_color=button_color)
+        self.btnEditarPaciente = ctk.CTkButton(self, text="EDITAR", fg_color=button_color, command=self.editarPaciente)
         self.btnEditarPaciente.configure(font=('Arial', 16, 'bold'))
         self.btnEditarPaciente.grid(row=11, column=0, padx=10, pady=5, sticky='w', columnspan=2)
 
-        self.btnEliminarPaciente = ctk.CTkButton(self, text="ELIMINAR", fg_color=button_color)
+        self.btnEliminarPaciente = ctk.CTkButton(self, text="ELIMINAR", fg_color=button_color, command=self.eliminarDatoPaciente)
         self.btnEliminarPaciente.configure(font=('Arial', 16, 'bold'))
         self.btnEliminarPaciente.grid(column=1, row=11, padx=10, pady=5, sticky="w", columnspan=2)
 
@@ -301,4 +298,62 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
         self.btnSalir = ctk.CTkButton(self, text='SALIR', command=self.root.destroy, fg_color=button_color)
         self.btnSalir.configure(font=('Arial', 16, 'bold'))
         self.btnSalir.grid(row=11, column=3, padx=10, pady=5, sticky='w', columnspan=2)
+
+    def guardarPaciente(self):
+        persona = Persona(
+            self.svNombre.get(), self.svApellidos.get(), self.svDNI.get(),
+            self.svEdad.get(), self.svPeso.get(), self.svTalla.get(), self.svPeso.get(),
+            self.svTelefono.get(), self.svAntecedentes.get()
+        )
+
+        if self.idPersona == None:
+            guardarDatoPaciente(persona)
+        else:
+            editarDatoPaciente(persona, self.idPersona)
+
+    
+    def editarPaciente(self):
+        try:
+            self.idPersona = self.tabla.item(self.tabla.selection())['text'] #Trae el ID
+            self.nombrePaciente = self.tabla.item(self.tabla.selection())['values'][0]
+            self.apellidosPaciente = self.tabla.item(self.tabla.selection())['values'][1]
+            self.dniPaciente = self.tabla.item(self.tabla.selection())['values'][2]
+            self.edadPaciente = self.tabla.item(self.tabla.selection())['values'][3]
+            self.pesoPaciente = self.tabla.item(self.tabla.selection())['values'][4]
+            self.tallaPaciente = self.tabla.item(self.tabla.selection())['values'][5]
+            self.imcPaciente = self.tabla.item(self.tabla.selection())['values'][6]
+            self.telefonoPaciente = self.tabla.item(self.tabla.selection())['values'][7]
+            self.antecedentesPaciente = self.tabla.item(self.tabla.selection())['values'][8]
+
+            self.habilitar()
+
+            self.entryNombre.insert(0, self.nombrePaciente)
+            self.entryApellidos.insert(0, self.apellidosPaciente)
+            self.entryDNI.insert(0, self.dniPaciente)
+            self.entryEdad.insert(0, self.edadPaciente)
+            self.entryPeso.insert(0, self.pesoPaciente)
+            self.entryTalla.insert(0,self.tallaPaciente)
+            self.entryIMC.insert(0,self.imcPaciente)
+            self.entryTelefono.insert(0,self.telefonoPaciente)
+            self.entryAntecedentes.insert(0,self.antecedentesPaciente)
+        except:
+            title = 'Editar Paciente'
+            mensaje = 'Error al editar paciente'
+            messagebox.showerror(title, mensaje)
+    
+    def eliminarDatoPaciente(self):
+        try:
+            self.idPersona = self.tabla.item(self.tabla.selection())['text']
+            eliminarPaciente(self.idPersona)
+            
+            self.tablaPaciente()
+            self.idPersona = None
+        except:
+            title = 'Eliminar Paciente'
+            mensaje = 'No se pudo eliminar paciente'
+            messagebox.showinfo(title, mensaje)
+
+        
+        self.deshabilitar()
+        self.tablaPaciente()
 
