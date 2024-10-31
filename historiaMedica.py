@@ -9,6 +9,7 @@ def main():
     root.title('HISTORIAL MEDICO')
     root.resizable(0, 0)
     
+    
     frame = Frame(root)
     frame.pack()  # This ensures the frame is displayed within the root window
     
