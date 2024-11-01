@@ -4,8 +4,7 @@ from tkinter import messagebox
 def editarDatoPaciente(persona, idPersona):
     conexion = ConexionDB()
     sql = f"""UPDATE Persona SET nombre = '{persona.nombre}', apellidos = '{persona.apellidos}',
-            dni = '{persona.dni}', edad = '{persona.edad}', peso = '{persona.peso}',
-            talla = {persona.talla}, imc = '{persona.imc}', telefono = '{persona.telefono}', antecedentes = '{persona.antecedentes}', activo = 1 WHERE idPersona = {idPersona}"""
+            dni = '{persona.dni}', edad = '{persona.edad}', telefono = '{persona.telefono}', correo='{persona.correo}', antecedentes = '{persona.antecedentes}', activo = 1 WHERE idPersona = {idPersona}"""
     try:
         conexion.cursor.execute(sql)
         conexion.cerrarConexion()
@@ -21,10 +20,9 @@ def editarDatoPaciente(persona, idPersona):
 def guardarDatoPaciente(persona):
     conexion = ConexionDB()
     sql = f"""INSERT INTO Persona (nombre, apellidos, dni,
-            edad, peso, talla, imc, telefono, antecedentes, activo) VALUES
+            edad, telefono, correo, antecedentes, activo) VALUES
             ('{persona.nombre}','{persona.apellidos}','{persona.dni}',
-            '{persona.edad}','{persona.peso}',{persona.talla},'{persona.imc}',
-            '{persona.telefono}','{persona.antecedentes}',1)"""
+            '{persona.edad}','{persona.telefono}','{persona.correo}','{persona.antecedentes}',1)"""
     try:
         conexion.cursor.execute(sql)
         conexion.cerrarConexion()
@@ -86,17 +84,15 @@ def eliminarPaciente(idPersona):
 
 
 class Persona:
-    def __init__(self, nombre, apellidos, dni, edad, peso, talla, imc, telefono, antecedentes):
+    def __init__(self, nombre, apellidos, dni, edad, telefono, correo, antecedentes):
         self.idPersona = None
         self.nombre = nombre
         self.apellidos = apellidos
         self.dni = dni
         self.edad = edad
-        self.peso=peso
-        self.talla=talla
-        self.imc=imc
         self.telefono = telefono
+        self.correo = correo
         self.antecedentes = antecedentes        
 
     def __str__(self):
-        return f'Persona[{self.nombre},{self.apellidos}, {self.dni}, {self.edad},{self.peso},{self.talla},{self.imc},{self.telefono},{self.antecedentes}]'
+        return f'Persona[{self.nombre},{self.apellidos}, {self.dni}, {self.edad},{self.telefono},{self.correo},{self.antecedentes}]'

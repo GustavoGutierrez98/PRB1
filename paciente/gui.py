@@ -1,32 +1,25 @@
 import tkinter as tk
 import customtkinter as ctk
 from customtkinter import *
-from time import strftime
 from tkinter import ttk
+from tkinter import Button, ttk, scrolledtext, Toplevel, LabelFrame
 from tkinter import messagebox
-from datetime import datetime
 from modelo.pacienteDao import Persona, guardarDatoPaciente, listarCondicion, listar, editarDatoPaciente, eliminarPaciente
+from paciente.historiaMP import historiaMedica,topAgregarHistoria,agregaHistorialMedico,eliminarHistorialMedico,topEditarHistorialMedico,historiaMedicaEditar,salirTop
+
 
 class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
     def __init__(self, root):
         super().__init__(root, width=1280, height=720)
         self.root = root
         self.pack()
+        self.idPersona = None
+        self.idPersonaHistoria = None
+        self.idHistoriaMedica = None
+        self.idHistoriaMedicaEditar = None
         self.camposPacientes()
-        self.lblReloj = ctk.CTkLabel(self, font=('Arial', 15, 'bold'), text_color='white')
-        self.lblReloj.grid(row=0, column=7, padx=10, pady=10,columnspan=7)
-        self.lblFecha = ctk.CTkLabel(self, font=('Arial', 15, 'bold'), text_color='white')
-        self.lblFecha.grid(row=0, column=6, padx=10, pady=5,columnspan=6)
-        self.deshabilitar()
         self.tablaPaciente()
-        self.reloj()        
-
-    def reloj(self):
-        tiempo = strftime('%I:%M:%S %p')  # Formato de 12 horas
-        fecha = datetime.now().strftime('%d de %B del %Y')  # Formato deseado
-        self.lblReloj.configure(text=tiempo)
-        self.lblFecha.configure(text=fecha)
-        self.lblReloj.after(1000, self.reloj) 
+        self.deshabilitar()
 
     def camposPacientes(self):
         # Labels for each field
@@ -46,25 +39,17 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
         self.lblEdad.configure(font=('ARIAL', 15, 'bold'), text_color='white')
         self.lblEdad.grid(column=0, row=3, padx=10, pady=5, sticky="w")
 
-        self.lblPeso = ctk.CTkLabel(self, text='Peso:')
-        self.lblPeso.configure(font=('ARIAL', 15, 'bold'), text_color='white')
-        self.lblPeso.grid(column=0, row=4, padx=10, pady=5, sticky="w")
-
-        self.lblTalla = ctk.CTkLabel(self, text='Talla:')
-        self.lblTalla.configure(font=('ARIAL', 15, 'bold'), text_color='white')
-        self.lblTalla.grid(column=0, row=5, padx=10, pady=5, sticky="w")
-
-        self.lblIMC = ctk.CTkLabel(self, text='IMC:')
-        self.lblIMC.configure(font=('ARIAL', 15, 'bold'), text_color='white')
-        self.lblIMC.grid(column=0, row=6, padx=10, pady=5, sticky="w")
-
         self.lblTelefono = ctk.CTkLabel(self, text='Teléfono:')
         self.lblTelefono.configure(font=('ARIAL', 15, 'bold'), text_color='white')
-        self.lblTelefono.grid(column=0, row=7, padx=10, pady=5, sticky="w")
+        self.lblTelefono.grid(column=0, row=4, padx=10, pady=5, sticky="w")
+
+        self.lblCorreo = ctk.CTkLabel(self, text='correo:')
+        self.lblCorreo.configure(font=('ARIAL', 15, 'bold'), text_color='white')
+        self.lblCorreo.grid(column=0, row=5, padx=10, pady=5, sticky="w")
 
         self.lblAntecedentes = ctk.CTkLabel(self, text='Antecedentes:')
         self.lblAntecedentes.configure(font=('ARIAL', 15, 'bold'), text_color='white')
-        self.lblAntecedentes.grid(column=0, row=8, padx=10, pady=5, sticky="w")
+        self.lblAntecedentes.grid(column=0, row=6, padx=10, pady=5, sticky="w")
 
         # Entry fields for each label
         self.svNombre = ctk.StringVar()
@@ -85,42 +70,31 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
         self.entryEdad.grid(column=1, row=3, padx=10, pady=5, sticky="w", columnspan=2)
         self.entryEdad.bind("<KeyRelease>", lambda e: self.validate_numeric(self.entryEdad))
 
-        self.svPeso = ctk.StringVar()
-        self.entryPeso = ctk.CTkEntry(self, width=200, textvariable=self.svPeso, placeholder_text="Ingrese peso")
-        self.entryPeso.grid(column=1, row=4, padx=10, pady=5, sticky="w", columnspan=2)
-        self.entryPeso.bind("<KeyRelease>", lambda e: self.validate_numeric(self.entryPeso))
-
-        self.svTalla = ctk.StringVar()
-        self.entryTalla = ctk.CTkEntry(self, width=200, textvariable=self.svTalla, placeholder_text="Ingrese talla")
-        self.entryTalla.grid(column=1, row=5, padx=10, pady=5, sticky="w", columnspan=2)
-        self.entryTalla.bind("<KeyRelease>", lambda e: self.validate_numeric(self.entryTalla))
-
-        self.svIMC = ctk.StringVar()
-        self.entryIMC = ctk.CTkEntry(self, width=200, textvariable=self.svIMC, placeholder_text="Ingrese IMC")
-        self.entryIMC.grid(column=1, row=6, padx=10, pady=5, sticky="w", columnspan=2)
-        self.entryIMC.bind("<KeyRelease>", lambda e: self.validate_numeric(self.entryIMC))
-
         self.svTelefono = ctk.StringVar()
         self.entryTelefono = ctk.CTkEntry(self, width=200, textvariable=self.svTelefono, placeholder_text="Ingrese teléfono")
-        self.entryTelefono.grid(column=1, row=7, padx=10, pady=5, sticky="w", columnspan=2)
+        self.entryTelefono.grid(column=1, row=4, padx=10, pady=5, sticky="w", columnspan=2)
         self.entryTelefono.bind("<KeyRelease>", lambda e: self.format_phone(self.entryTelefono))
+
+        self.svCorreo = ctk.StringVar()
+        self.entryCorreo = ctk.CTkEntry(self, width=200, textvariable=self.svCorreo, placeholder_text="Ingrese correo")
+        self.entryCorreo.grid(column=1, row=5, padx=10, pady=5, sticky="w", columnspan=2)
 
         self.svAntecedentes = ctk.StringVar()
         self.entryAntecedentes = ctk.CTkEntry(self, width=200, textvariable=self.svAntecedentes, placeholder_text="Ingrese antecedentes")
-        self.entryAntecedentes.grid(column=1, row=8, padx=10, pady=5, sticky="w", columnspan=2)
+        self.entryAntecedentes.grid(column=1, row=6, padx=10, pady=5, sticky="w", columnspan=2)
 
         # Buttons
         self.btnNuevo = ctk.CTkButton(self, text="NUEVO", command=self.habilitar, text_color='white')
         self.btnNuevo.configure(font=('ARIAL',16,'bold'),fg_color="#800080")
-        self.btnNuevo.grid(column=0, row=9, padx=10, pady=5, sticky="w")
+        self.btnNuevo.grid(column=0, row=7, padx=10, pady=5, sticky="w")
 
         self.btnGuardar = ctk.CTkButton(self, text="GUARDAR", command=self.guardarPaciente, text_color='white')        
         self.btnGuardar.configure(font=('ARIAL',16,'bold'),fg_color="#800080")
-        self.btnGuardar.grid(column=1, row=9, padx=10, pady=5, sticky="w")
+        self.btnGuardar.grid(column=1, row=7, padx=10, pady=5, sticky="w")
 
         self.btnCancelar = ctk.CTkButton(self, text="CANCELAR", command=self.deshabilitar, text_color='white')
         self.btnCancelar.configure(font=('ARIAL',16,'bold'),fg_color="#800080")
-        self.btnCancelar.grid(column=2, row=9, padx=10, pady=5, sticky="w")
+        self.btnCancelar.grid(column=2, row=7, padx=10, pady=5, sticky="w")
 
         #BUSCADOR
         #LABEL BUSCADOR
@@ -193,20 +167,16 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
         self.svApellidos.set('')
         self.svDNI.set('')
         self.svEdad.set('')
-        self.svPeso.set('')
-        self.svTalla.set('')
-        self.svIMC.set('')
         self.svTelefono.set('')
+        self.svCorreo.set('')
         self.svAntecedentes.set('')
 
         self.entryNombre.configure(state='normal')
         self.entryApellidos.configure(state='normal')
         self.entryDNI.configure(state='normal')
         self.entryEdad.configure(state='normal')
-        self.entryPeso.configure(state='normal')
-        self.entryTalla.configure(state='normal')
-        self.entryIMC.configure(state='normal')
         self.entryTelefono.configure(state='normal')
+        self.entryCorreo.configure(state='normal')
         self.entryAntecedentes.configure(state='normal')
 
         self.btnGuardar.configure(state='normal')
@@ -218,19 +188,14 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
         self.svApellidos.set('')
         self.svDNI.set('')
         self.svEdad.set('')
-        self.svPeso.set('')
-        self.svTalla.set('')
-        self.svIMC.set('')
         self.svTelefono.set('')
+        self.svCorreo.set('')
         self.svAntecedentes.set('')
 
         self.entryNombre.configure(state='disabled')
         self.entryApellidos.configure(state='disabled')
         self.entryDNI.configure(state='disabled')
         self.entryEdad.configure(state='disabled')
-        self.entryPeso.configure(state='disabled')
-        self.entryTalla.configure(state='disabled')
-        self.entryIMC.configure(state='disabled')
         self.entryTelefono.configure(state='disabled')
         self.entryAntecedentes.configure(state='disabled')
 
@@ -240,7 +205,7 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
         else:
             self.listaPersona = listar()
 
-        self.tabla = ttk.Treeview(self, column=('Nombre', 'Apellidos', 'Dni', 'Edad', 'Peso', 'Talla', 'IMC', 'Telefono', 'Antecedentes'))
+        self.tabla = ttk.Treeview(self, column=('Nombre', 'Apellidos', 'Dni', 'Edad', 'Telefono', 'Correo', 'Antecedentes'))
         self.tabla.grid(column=0, row=10, columnspan=10, sticky='nse')
 
         self.scroll = ttk.Scrollbar(self, orient='vertical', command=self.tabla.yview)
@@ -258,11 +223,9 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
         self.tabla.heading('#2', text='Apellidos', anchor=W)
         self.tabla.heading('#3', text='DNI', anchor=W)
         self.tabla.heading('#4', text='Edad', anchor=W)
-        self.tabla.heading('#5', text='Peso', anchor=W)
-        self.tabla.heading('#6', text='Talla', anchor=W)
-        self.tabla.heading('#7', text='IMC', anchor=W)
-        self.tabla.heading('#8', text='Telefono', anchor=W)
-        self.tabla.heading('#9', text='Antecedentes', anchor=W)
+        self.tabla.heading('#5', text='Telefono', anchor=W)
+        self.tabla.heading('#6', text='Correo', anchor=W)
+        self.tabla.heading('#7', text='Antecedentes', anchor=W)
 
         # Definir el ancho de las columnas
         self.tabla.column("#0", anchor=W, width=50)    # ID
@@ -270,16 +233,14 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
         self.tabla.column("#2", anchor=W, width=150)   # Apellidos
         self.tabla.column("#3", anchor=W, width=100)   # DNI
         self.tabla.column("#4", anchor=W, width=50)    # Edad
-        self.tabla.column("#5", anchor=W, width=70)    # Peso
-        self.tabla.column("#6", anchor=W, width=70)    # Talla
-        self.tabla.column("#7", anchor=W, width=70)    # IMC
-        self.tabla.column("#8", anchor=W, width=120)   # Teléfono
-        self.tabla.column("#9", anchor=W, width=300)   # Antecedentes
+        self.tabla.column("#5", anchor=W, width=120)   # Teléfono
+        self.tabla.column("#6", anchor=W, width=120)   # Correo
+        self.tabla.column("#7", anchor=W, width=300)   # Antecedentes
 
     # Insertar datos en la tabla
         for index, p in enumerate(self.listaPersona):
             tag = 'evenrow' if index % 2 == 0 else 'oddrow'  # Alternar filas
-            self.tabla.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]), tags=(tag,))
+            self.tabla.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8]), tags=(tag,))
 
     # Configuración de botones
         button_color = "#800080"  # Color púrpura
@@ -302,14 +263,16 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
     def guardarPaciente(self):
         persona = Persona(
             self.svNombre.get(), self.svApellidos.get(), self.svDNI.get(),
-            self.svEdad.get(), self.svPeso.get(), self.svTalla.get(), self.svPeso.get(),
-            self.svTelefono.get(), self.svAntecedentes.get()
+            self.svEdad.get(), self.svTelefono.get(), self.svCorreo.get(), self.svAntecedentes.get()
         )
 
         if self.idPersona == None:
             guardarDatoPaciente(persona)
         else:
             editarDatoPaciente(persona, self.idPersona)
+        
+        self.deshabilitar()
+        self.tablaPaciente()
 
     
     def editarPaciente(self):
@@ -319,11 +282,9 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
             self.apellidosPaciente = self.tabla.item(self.tabla.selection())['values'][1]
             self.dniPaciente = self.tabla.item(self.tabla.selection())['values'][2]
             self.edadPaciente = self.tabla.item(self.tabla.selection())['values'][3]
-            self.pesoPaciente = self.tabla.item(self.tabla.selection())['values'][4]
-            self.tallaPaciente = self.tabla.item(self.tabla.selection())['values'][5]
-            self.imcPaciente = self.tabla.item(self.tabla.selection())['values'][6]
-            self.telefonoPaciente = self.tabla.item(self.tabla.selection())['values'][7]
-            self.antecedentesPaciente = self.tabla.item(self.tabla.selection())['values'][8]
+            self.telefonoPaciente = self.tabla.item(self.tabla.selection())['values'][4]
+            self.correoPaciente = self.tabla.item(self.tabla.selection())['values'][5]
+            self.antecedentesPaciente = self.tabla.item(self.tabla.selection())['values'][6]
 
             self.habilitar()
 
@@ -331,10 +292,8 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
             self.entryApellidos.insert(0, self.apellidosPaciente)
             self.entryDNI.insert(0, self.dniPaciente)
             self.entryEdad.insert(0, self.edadPaciente)
-            self.entryPeso.insert(0, self.pesoPaciente)
-            self.entryTalla.insert(0,self.tallaPaciente)
-            self.entryIMC.insert(0,self.imcPaciente)
             self.entryTelefono.insert(0,self.telefonoPaciente)
+            self.entryCorreo.insert(0, self.correoPaciente)
             self.entryAntecedentes.insert(0,self.antecedentesPaciente)
         except:
             title = 'Editar Paciente'
@@ -352,8 +311,3 @@ class Frame(ctk.CTkFrame):  # Inheriting from CTkFrame for better compatibility
             title = 'Eliminar Paciente'
             mensaje = 'No se pudo eliminar paciente'
             messagebox.showinfo(title, mensaje)
-
-        
-        self.deshabilitar()
-        self.tablaPaciente()
-
